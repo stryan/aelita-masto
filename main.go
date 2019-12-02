@@ -10,6 +10,7 @@ import (
 
 	"github.com/mattn/go-mastodon"
 	"github.com/spf13/viper"
+	"github.com/stryan/aelitalib"
 )
 
 func main() {
@@ -30,6 +31,7 @@ func main() {
 	email := viper.GetString("email")
 	password := viper.GetString("password")
 	owner := viper.GetString("owner")
+	dry := viper.GetBool("dry") //If set, don't actually send DMs or add to DB
 	c := mastodon.NewClient(&mastodon.Config{
 		Server:       server,
 		ClientID:     clientID,
@@ -42,7 +44,7 @@ func main() {
 	r := regexp.MustCompile(`</a><\/span>(.+)?<\/p>`)
 	db := CreateTextDB("/var/db.txt")
 	db.Open()
-	aelita := connectToAelita(host, port)
+	aelita := aelitalib.Connect(host, port)
 	br := true
 	for br == true {
 		notifications := getDMs(c)
@@ -51,7 +53,12 @@ func main() {
 			if (!db.Check(string(n.ID)) && n.Status.Visibility == (mastodon.VisibilityDirectMessage)) {
 				fmt.Println("Responding")
 				cmd := parseStatus(n.Status, r)
-				err := db.Add(string(n.ID))
+				err := false
+				if !dry {
+					err = db.Add(string(n.ID))
+				} else {
+					err = true
+				}
 				if err == false {
 					log.Fatal("Failed to add to db")
 				}
@@ -59,9 +66,11 @@ func main() {
 					br = false
 				} else {
 					fmt.Println("Checking with Aelita")
-					respond := sendCommand(aelita,cmd)
+					respond := aelita.Send(cmd)
 					fmt.Println("Sending DM")
-					sendDM(c, respond, owner)
+					if !dry {
+						sendDM(c, respond, owner)
+					}
 					fmt.Println("DM sent")
 				}
 			}
@@ -72,7 +81,7 @@ func main() {
 		fmt.Println("checking again")
 	}
 	db.Close()
-	disconnectFromAelita(aelita)
+	aelita.Disconnect()	
 	fmt.Println("done")
 }
 

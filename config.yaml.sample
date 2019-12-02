@@ -6,3 +6,4 @@ client_secret: "<your client secret here>"
 email: "<your email here>"
 password: "<your password here>"
 owner: "@<your username>@<server name>"
+dry: false
