@@ -77,6 +77,7 @@ func main() {
 		}
 		if br == true {
 			time.Sleep(10 * time.Second)
+			db.Sync()
 		}
 		fmt.Println("checking again")
 	}
