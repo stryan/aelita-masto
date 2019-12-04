@@ -66,7 +66,8 @@ func main() {
 					br = false
 				} else {
 					fmt.Println("Checking with Aelita")
-					respond := aelita.Send(cmd)
+					id := aelita.Send(cmd)
+					respond := aelita.Receive(id)
 					fmt.Println("Sending DM")
 					if !dry {
 						sendDM(c, respond, owner)
