@@ -48,7 +48,6 @@ func main() {
 	br := true
 	for br == true {
 		notifications := getDMs(c)
-		fmt.Println("Reading notifications")
 		for _, n := range notifications {
 			if (!db.Check(string(n.ID)) && n.Status.Visibility == (mastodon.VisibilityDirectMessage)) {
 				fmt.Println("Responding")
@@ -80,7 +79,6 @@ func main() {
 			time.Sleep(10 * time.Second)
 			db.Sync()
 		}
-		fmt.Println("checking again")
 	}
 	db.Close()
 	aelita.Disconnect()	
